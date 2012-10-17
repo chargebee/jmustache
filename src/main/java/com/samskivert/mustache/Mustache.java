@@ -530,7 +530,7 @@ public class Mustache
     }
 
     /** A simple segment that reproduces a string. */
-    protected static class StringSegment extends Template.Segment {
+    public static class StringSegment extends Template.Segment {
         public StringSegment (String text) {
             _text = text;
         }
@@ -540,7 +540,7 @@ public class Mustache
         protected final String _text;
     }
 
-    protected static class IncludedTemplateSegment extends Template.Segment {
+    public static class IncludedTemplateSegment extends Template.Segment {
         public IncludedTemplateSegment (String name, Compiler compiler) {
             _name = name;
             _compiler = compiler;
@@ -569,17 +569,17 @@ public class Mustache
     }
 
     /** A helper class for named segments. */
-    protected static abstract class NamedSegment extends Template.Segment {
+    public static abstract class NamedSegment extends Template.Segment {
         protected NamedSegment (String name, int line) {
             _name = name.intern();
             _line = line;
         }
-        protected final String _name;
-        protected final int _line;
+        public final String _name;
+        public final int _line;
     }
 
     /** A segment that substitutes the contents of a variable. */
-    protected static class VariableSegment extends NamedSegment {
+    public static class VariableSegment extends NamedSegment {
         public VariableSegment (String name, boolean escapeHTML, int line) {
             super(name, line);
             _escapeHTML = escapeHTML;
@@ -597,7 +597,7 @@ public class Mustache
     }
 
     /** A helper class for block segments. */
-    protected static abstract class BlockSegment extends NamedSegment {
+    public static abstract class BlockSegment extends NamedSegment {
         protected BlockSegment (String name, Template.Segment[] segs, int line) {
             super(name, line);
             _segs = segs;
@@ -611,7 +611,7 @@ public class Mustache
     }
 
     /** A segment that represents a section. */
-    protected static class SectionSegment extends BlockSegment {
+    public static class SectionSegment extends BlockSegment {
         public SectionSegment (String name, Template.Segment[] segs, int line, Compiler compiler) {
             super(name, segs, line);
             _compiler = compiler;
@@ -640,7 +640,7 @@ public class Mustache
     }
 
     /** A segment that represents an inverted section. */
-    protected static class InvertedSectionSegment extends BlockSegment {
+    public static class InvertedSectionSegment extends BlockSegment {
         public InvertedSectionSegment (String name, Template.Segment[] segs, int line) {
             super(name, segs, line);
         }

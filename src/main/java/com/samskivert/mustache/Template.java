@@ -230,7 +230,7 @@ public class Template
         }
     }
 
-    protected final Segment[] _segs;
+    public final Segment[] _segs;
     protected final Mustache.Compiler _compiler;
     protected final Map<Key, Mustache.VariableFetcher> _fcache;
 
@@ -256,7 +256,7 @@ public class Template
     }
 
     /** A template is broken into segments. */
-    protected static abstract class Segment
+    public static abstract class Segment
     {
         abstract void execute (Template tmpl, Context ctx, Writer out);
 
