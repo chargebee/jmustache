@@ -22,7 +22,7 @@ public abstract class BasicCollector implements Mustache.Collector
         return null;
     }
 
-    public Mustache.VariableFetcher createFetcher (Object ctx, String name) {
+    public VariableFetcher createFetcher (Object ctx, String name) {
         // support both .name and this.name to fetch members
         if (name == Template.DOT_NAME || name == Template.THIS_NAME) {
             return THIS_FETCHER;
@@ -39,13 +39,13 @@ public abstract class BasicCollector implements Mustache.Collector
      * a standard {@link Map} implementation or something like {@code ConcurrentHashMap}. */
     public abstract <K,V> Map<K,V> createFetcherCache ();
 
-    protected static final Mustache.VariableFetcher MAP_FETCHER = new Mustache.VariableFetcher() {
+    protected static final VariableFetcher MAP_FETCHER = new VariableFetcher() {
         public Object get (Object ctx, String name) throws Exception {
             return ((Map<?,?>)ctx).get(name);
         }
     };
 
-    protected static final Mustache.VariableFetcher THIS_FETCHER = new Mustache.VariableFetcher() {
+    protected static final VariableFetcher THIS_FETCHER = new VariableFetcher() {
         public Object get (Object ctx, String name) throws Exception {
             return ctx;
         }

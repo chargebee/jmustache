@@ -69,14 +69,14 @@ public class Template
         executeSegs(new Context(context, pctx, 0, false, false), out);
     }
 
-    protected Template (Segment[] segs, Mustache.Compiler compiler)
+    public Template (Segment[] segs, Mustache.Compiler compiler)
     {
         _segs = segs;
         _compiler = compiler;
         _fcache = _compiler.collector.createFetcherCache();
     }
 
-    protected void executeSegs (Context ctx, Writer out) throws MustacheException
+    public void executeSegs (Context ctx, Writer out) throws MustacheException
     {
         for (Segment seg : _segs) {
             seg.execute(this, ctx, out);
@@ -94,7 +94,7 @@ public class Template
      *
      * @return the value associated with the supplied name or null if no value could be resolved.
      */
-    protected Object getValue (Context ctx, String name, int line, boolean missingIsNull)
+    public Object getValue (Context ctx, String name, int line, boolean missingIsNull)
     {
         if (!_compiler.standardsMode) {
             // if we're dealing with a compound key, resolve each component and use the result to
@@ -162,7 +162,7 @@ public class Template
      * will be the means by which we enact configured behavior for sections that reference null or
      * missing variables. Right now, all such variables result in a length 0 section.
      */
-    protected Object getSectionValue (Context ctx, String name, int line)
+    public Object getSectionValue (Context ctx, String name, int line)
     {
         // TODO: configurable behavior on missing values
         Object value = getValue(ctx, name, line, _compiler.missingIsNull);
@@ -174,7 +174,7 @@ public class Template
      * Returns the value for the specified variable, or the configured default value if the
      * variable resolves to null. See {@link #getValue}.
      */
-    protected Object getValueOrDefault (Context ctx, String name, int line)
+    public Object getValueOrDefault (Context ctx, String name, int line)
     {
         Object value = getValue(ctx, name, line, _compiler.missingIsNull);
         // getValue will raise MustacheException if a variable cannot be resolved and missingIsNull
@@ -183,7 +183,7 @@ public class Template
         return (value == null) ? _compiler.nullValue : value;
     }
 
-    protected Object getValueIn (Object data, String name, int line)
+    public Object getValueIn (Object data, String name, int line)
     {
         if (data == null) {
             throw new NullPointerException(
@@ -191,7 +191,7 @@ public class Template
         }
 
         Key key = new Key(data.getClass(), name);
-        Mustache.VariableFetcher fetcher = _fcache.get(key);
+        VariableFetcher fetcher = _fcache.get(key);
         if (fetcher != null) {
             try {
                 return fetcher.get(data, name);
@@ -219,7 +219,7 @@ public class Template
         }
     }
 
-    protected Object checkForMissing (String name, int line, boolean missingIsNull, Object value)
+    public Object checkForMissing (String name, int line, boolean missingIsNull, Object value)
     {
         if (value == NO_FETCHER_FOUND) {
             if (missingIsNull) return null;
@@ -230,11 +230,11 @@ public class Template
         }
     }
 
-    public final Segment[] _segs;
-    protected final Mustache.Compiler _compiler;
-    protected final Map<Key, Mustache.VariableFetcher> _fcache;
+    public Segment[] _segs;
+    public final Mustache.Compiler _compiler;
+    public final Map<Key, VariableFetcher> _fcache;
 
-    protected static class Context
+    public static class Context
     {
         public final Object data;
         public final Context parent;
@@ -260,7 +260,7 @@ public class Template
     {
         abstract void execute (Template tmpl, Context ctx, Writer out);
 
-        protected static void write (Writer out, String data) {
+        public static void write (Writer out, String data) {
             try {
                 out.write(data);
             } catch (IOException ioe) {
@@ -270,7 +270,7 @@ public class Template
     }
 
     /** Used to cache variable fetchers for a given context class, name combination. */
-    protected static class Key
+    public static class Key
     {
         public final Class<?> cclass;
         public final String name;

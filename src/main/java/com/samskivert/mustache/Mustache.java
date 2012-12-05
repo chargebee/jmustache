@@ -143,13 +143,6 @@ public class Mustache
         public Reader getTemplate (String name) throws Exception;
     }
 
-    /** Used to read variables from values. */
-    public interface VariableFetcher
-    {
-        /** Reads the so-named variable from the supplied context object. */
-        Object get (Object ctx, String name) throws Exception;
-    }
-
     /** Handles interpreting objects as collections. */
     public interface Collector
     {
@@ -517,16 +510,21 @@ public class Mustache
             }
         }
 
-        protected static void requireSameName (String name1, String name2, int line)
-        {
+        public static void requireSameName(String name1, String name2, int line) {
+            if (name1.contains("=")) {
+                name1 = name1.substring(0, name1.indexOf("=")).trim();
+            }
+            if (name2.contains("=")) {
+                name2 = name2.substring(0, name2.indexOf("=")).trim();
+            }
             if (!name1.equals(name2)) {
-                throw new MustacheParseException("Section close tag with mismatched open tag '" +
-                                                 name2 + "' != '" + name1 + "'", line);
+                throw new MustacheParseException("Section close tag with mismatched open tag '"
+                        + name2 + "' != '" + name1 + "'", line);
             }
         }
 
-        protected final Compiler _compiler;
-        protected final List<Template.Segment> _segs = new ArrayList<Template.Segment>();
+        public final Compiler _compiler;
+        public final List<Template.Segment> _segs = new ArrayList<Template.Segment>();
     }
 
     /** A simple segment that reproduces a string. */
@@ -537,7 +535,7 @@ public class Mustache
         @Override public void execute (Template tmpl, Template.Context ctx, Writer out) {
             write(out, _text);
         }
-        protected final String _text;
+        public final String _text;
     }
 
     public static class IncludedTemplateSegment extends Template.Segment {
@@ -563,14 +561,14 @@ public class Mustache
             // would happen if we just called execute() with ctx.data
             _template.executeSegs(ctx, out);
         }
-        protected final String _name;
-        protected final Compiler _compiler;
-        protected Template _template;
+        public final String _name;
+        public final Compiler _compiler;
+        public Template _template;
     }
 
     /** A helper class for named segments. */
     public static abstract class NamedSegment extends Template.Segment {
-        protected NamedSegment (String name, int line) {
+        public NamedSegment (String name, int line) {
             _name = name.intern();
             _line = line;
         }
@@ -593,21 +591,21 @@ public class Mustache
             String text = String.valueOf(value);
             write(out, _escapeHTML ? escapeHTML(text) : text);
         }
-        protected boolean _escapeHTML;
+        public boolean _escapeHTML;
     }
 
     /** A helper class for block segments. */
     public static abstract class BlockSegment extends NamedSegment {
-        protected BlockSegment (String name, Template.Segment[] segs, int line) {
+        public BlockSegment (String name, Template.Segment[] segs, int line) {
             super(name, line);
             _segs = segs;
         }
-        protected void executeSegs (Template tmpl, Template.Context ctx, Writer out)  {
+        public void executeSegs (Template tmpl, Template.Context ctx, Writer out)  {
             for (Template.Segment seg : _segs) {
                 seg.execute(tmpl, ctx, out);
             }
         }
-        protected final Template.Segment[] _segs;
+        public Template.Segment[] _segs;
     }
 
     /** A segment that represents a section. */
@@ -636,7 +634,7 @@ public class Mustache
                 executeSegs(tmpl, ctx.nest(value, 0, false, false), out);
             }
         }
-        protected final Compiler _compiler;
+        public final Compiler _compiler;
     }
 
     /** A segment that represents an inverted section. */
@@ -661,7 +659,7 @@ public class Mustache
 
     /** Map of strings that must be replaced inside html attributes and their replacements. (They
      * need to be applied in order so amps are not double escaped.) */
-    protected static final String[][] ATTR_ESCAPES = {
+    public static final String[][] ATTR_ESCAPES = {
         { "&", "&amp;" },
         { "'", "&#39;" },
         { "\"", "&quot;" },
