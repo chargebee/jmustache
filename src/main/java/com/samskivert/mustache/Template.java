@@ -94,8 +94,12 @@ public class Template
      *
      * @return the value associated with the supplied name or null if no value could be resolved.
      */
+    public String fullname = null;
     public Object getValue (Context ctx, String name, int line, boolean missingIsNull)
     {
+        if (name.contains(".")) {
+            this.fullname = name;
+        }
         if (!_compiler.standardsMode) {
             // if we're dealing with a compound key, resolve each component and use the result to
             // resolve the subsequent component and so forth
@@ -194,7 +198,7 @@ public class Template
         VariableFetcher fetcher = _fcache.get(key);
         if (fetcher != null) {
             try {
-                return fetcher.get(data, name);
+                return fetcher.get(data, name, fullname);
             } catch (Exception e) {
                 // zoiks! non-monomorphic call site, update the cache and try again
                 fetcher = _compiler.collector.createFetcher(data, key.name);
@@ -210,7 +214,7 @@ public class Template
         }
 
         try {
-            Object value = fetcher.get(data, name);
+            Object value = fetcher.get(data, name, fullname);
             _fcache.put(key, fetcher);
             return value;
         } catch (Exception e) {

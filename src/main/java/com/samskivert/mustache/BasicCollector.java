@@ -40,13 +40,13 @@ public abstract class BasicCollector implements Mustache.Collector
     public abstract <K,V> Map<K,V> createFetcherCache ();
 
     protected static final VariableFetcher MAP_FETCHER = new VariableFetcher() {
-        public Object get (Object ctx, String name) throws Exception {
+        public Object get (Object ctx, String name,String originalName) throws Exception {
             return ((Map<?,?>)ctx).get(name);
         }
     };
 
     protected static final VariableFetcher THIS_FETCHER = new VariableFetcher() {
-        public Object get (Object ctx, String name) throws Exception {
+        public Object get (Object ctx, String name,String originalName) throws Exception {
             return ctx;
         }
     };

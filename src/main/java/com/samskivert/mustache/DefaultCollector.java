@@ -44,7 +44,7 @@ public class DefaultCollector extends BasicCollector
         final Method m = getMethod(cclass, name);
         if (m != null) {
             return new VariableFetcher() {
-                public Object get (Object ctx, String name) throws Exception {
+                public Object get (Object ctx, String name, String originalName) throws Exception {
                     return m.invoke(ctx);
                 }
             };
@@ -53,7 +53,7 @@ public class DefaultCollector extends BasicCollector
         final Field f = getField(cclass, name);
         if (f != null) {
             return new VariableFetcher() {
-                public Object get (Object ctx, String name) throws Exception {
+                public Object get (Object ctx, String name, String originalName) throws Exception {
                     return f.get(ctx);
                 }
             };
