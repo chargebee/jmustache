@@ -84,6 +84,12 @@ public class Template
     }
 
     /**
+     * This is a hack for now. We don't use multiple levels nor do we really need it.
+     */
+    public String fullname = null;
+
+    
+    /**
      * Called by executing segments to obtain the value of the specified variable in the supplied
      * context.
      *
@@ -94,11 +100,13 @@ public class Template
      *
      * @return the value associated with the supplied name or null if no value could be resolved.
      */
-    public String fullname = null;
     public Object getValue (Context ctx, String name, int line, boolean missingIsNull)
     {
+        boolean fullNameSet = false;
+        try{
         if (name.contains(".")) {
             this.fullname = name;
+            fullNameSet = true;
         }
         if (!_compiler.standardsMode) {
             // if we're dealing with a compound key, resolve each component and use the result to
@@ -158,6 +166,11 @@ public class Template
         // for our variable, we need to let checkForMissing() know
         return checkForMissing(name, line, missingIsNull,
                                variableMissing ? NO_FETCHER_FOUND : null);
+        }finally{
+            if(fullNameSet){
+                fullname = null;
+            }
+        }
     }
 
     /**
