@@ -85,8 +85,9 @@ public class Template
 
     /**
      * This is a hack for now. We don't use multiple levels nor do we really need it.
+     * Currently our usecase is single threaded at template level. But who knows later
      */
-    public String fullname = null;
+    public ThreadLocal<String> fullname = new ThreadLocal<String>();
 
     
     /**
@@ -105,7 +106,7 @@ public class Template
         boolean fullNameSet = false;
         try{
         if (name.contains(".")) {
-            this.fullname = name;
+            this.fullname.set(name);
             fullNameSet = true;
         }
         if (!_compiler.standardsMode) {
@@ -168,7 +169,7 @@ public class Template
                                variableMissing ? NO_FETCHER_FOUND : null);
         }finally{
             if(fullNameSet){
-                fullname = null;
+                fullname.set(null);
             }
         }
     }
@@ -211,7 +212,7 @@ public class Template
         VariableFetcher fetcher = _fcache.get(key);
         if (fetcher != null) {
             try {
-                return fetcher.get(data, name, fullname);
+                return fetcher.get(data, name, fullname.get());
             } catch (Exception e) {
                 // zoiks! non-monomorphic call site, update the cache and try again
                 fetcher = _compiler.collector.createFetcher(data, key.name);
@@ -227,7 +228,7 @@ public class Template
         }
 
         try {
-            Object value = fetcher.get(data, name, fullname);
+            Object value = fetcher.get(data, name, fullname.get());
             _fcache.put(key, fetcher);
             return value;
         } catch (Exception e) {
