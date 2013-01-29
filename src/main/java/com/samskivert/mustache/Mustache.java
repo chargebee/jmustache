@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides <a href="http://mustache.github.com/">Mustache</a> templating services.
@@ -56,6 +58,11 @@ public class Mustache
         /** The collector used by templates compiled with this compiler. */
         public final Collector collector;
 
+        /** Used for checking the section tag*/
+        public BlockSegmentValidator blockValidator;
+
+        
+        
         /** Compiles the supplied template into a repeatedly executable intermediate form. */
         public Template compile (String template) {
             return compile(new StringReader(template));
@@ -133,7 +140,7 @@ public class Mustache
             this.loader = loader;
             this.collector = collector;
         }
-    }
+  }
 
     /** Used to handle partials. */
     public interface TemplateLoader
@@ -160,6 +167,8 @@ public class Mustache
          * the JVM and Android, returns a concurrent hashmap. */
         <K,V> Map<K,V> createFetcherCache ();
     }
+    
+
 
     /**
      * Returns a compiler that escapes HTML by default and does not use standards mode.
@@ -445,7 +454,10 @@ public class Mustache
                             "Section missing close tag '" + tag1 + "'", tagLine);
                     }
                     @Override protected Accumulator addCloseSectionSegment (String itag, int line) {
-                        requireSameName(tag1, itag, line);
+                                               
+                        if(_compiler.blockValidator != null){
+                            _compiler.blockValidator.validate(tag1, itag, line);
+                        }
                         outer._segs.add(
                             new SectionSegment(itag, super.finish(), tagLine, _compiler));
                         return outer;
@@ -468,7 +480,11 @@ public class Mustache
                             "Inverted section missing close tag '" + tag1 + "'", tagLine);
                     }
                     @Override protected Accumulator addCloseSectionSegment (String itag, int line) {
-                        requireSameName(tag1, itag, line);
+                        //requireSameName(tag1, itag, line);                                               
+                                               
+                        if(_compiler.blockValidator != null){
+                            _compiler.blockValidator.validate(tag1, itag, line);
+                        }
                         outer._segs.add(new InvertedSectionSegment(itag, super.finish(), tagLine));
                         return outer;
                     }
@@ -510,19 +526,6 @@ public class Mustache
             }
         }
 
-        public static void requireSameName(String name1, String name2, int line) {
-            if (name1.contains("=")) {
-                name1 = name1.substring(0, name1.indexOf("=")).trim();
-            }
-            if (name2.contains("=")) {
-                name2 = name2.substring(0, name2.indexOf("=")).trim();
-            }
-            if (!name1.equals(name2)) {
-                throw new MustacheParseException("Section close tag with mismatched open tag '"
-                        + name2 + "' != '" + name1 + "'", line);
-            }
-        }
-
         public final Compiler _compiler;
         public final List<Template.Segment> _segs = new ArrayList<Template.Segment>();
     }
@@ -534,7 +537,7 @@ public class Mustache
         }
         @Override public void execute (Template tmpl, Template.Context ctx, Writer out) {
             write(out, _text);
-        }
+           }
         public final String _text;
     }
 
@@ -600,11 +603,13 @@ public class Mustache
             super(name, line);
             _segs = segs;
         }
+        
         public void executeSegs (Template tmpl, Template.Context ctx, Writer out)  {
-            for (Template.Segment seg : _segs) {
-                seg.execute(tmpl, ctx, out);
-            }
+           for (Template.Segment seg : _segs) {
+            seg.execute(tmpl, ctx, out);
+          }
         }
+        
         public Template.Segment[] _segs;
     }
 
@@ -617,6 +622,13 @@ public class Mustache
         @Override public void execute (Template tmpl, Template.Context ctx, Writer out)  {
             Object value = tmpl.getSectionValue(ctx, _name, _line); // won't return null
             Iterator<?> iter = tmpl._compiler.collector.toIterator(value);
+             if(_name.indexOf(".")!=-1){
+            String str=_name.substring(_name.indexOf(".")+1);
+            if((str.equals("record"))){
+                    value=true;
+                    iter=null;
+             }
+            }
             if (iter != null) {
                 int index = 0;
                 while (iter.hasNext()) {
@@ -642,9 +654,19 @@ public class Mustache
         public InvertedSectionSegment (String name, Template.Segment[] segs, int line) {
             super(name, segs, line);
         }
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out)  {
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             Object value = tmpl.getSectionValue(ctx, _name, _line); // won't return null
             Iterator<?> iter = tmpl._compiler.collector.toIterator(value);
+            if (_name.indexOf(".") != -1) {
+                String str = _name.substring(_name.indexOf(".") + 1);
+                if ((str.equals("record"))) {
+                    if (ctx.onLast == true) {
+                        value = true;
+                        iter = null;
+                    }
+                }
+            }
             if (iter != null) {
                 if (!iter.hasNext()) {
                     executeSegs(tmpl, ctx, out);
