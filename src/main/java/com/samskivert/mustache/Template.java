@@ -198,6 +198,9 @@ public class Template
         // getValue will raise MustacheException if a variable cannot be resolved and missingIsNull
         // is not configured; so we're safe to assume that any null that makes it up to this point
         // can be converted to nullValue
+        if(value == null && _compiler.defaultValProvider != null){
+            value = _compiler.defaultValProvider.getValueFor(name,line);
+        }
         return (value == null) ? _compiler.nullValue : value;
     }
 

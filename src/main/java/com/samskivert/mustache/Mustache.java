@@ -61,6 +61,8 @@ public class Mustache
         /** Used for checking the section tag*/
         public BlockSegmentValidator blockValidator;
 
+        /** Used for return default value*/
+        public DefaultValueProvider defaultValProvider;
         
         
         /** Compiles the supplied template into a repeatedly executable intermediate form. */
