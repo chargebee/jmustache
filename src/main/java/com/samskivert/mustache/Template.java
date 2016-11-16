@@ -113,7 +113,12 @@ public class Template
             // if we're dealing with a compound key, resolve each component and use the result to
             // resolve the subsequent component and so forth
             if (name != DOT_NAME && name.indexOf(DOT_NAME) != -1) {
-                String[] comps = name.split("\\.");
+                boolean hasEquals = name.contains("=");
+                String[] compsE = name.split("=");
+                String[] comps = compsE[0].split("\\.");
+                if (hasEquals) {
+                    comps[comps.length - 1] += " = "+compsE[1];
+                }
                 // we want to allow the first component of a compound key to be located in a parent
                 // context, but once we're selecting sub-components, they must only be resolved in
                 // the object that represents that component
